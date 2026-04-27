@@ -5,12 +5,51 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(AppFrame::new);
+        try {
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    new AppFrame();
+                } catch (Throwable t) {
+                    logStartupFailure(t);
+                    System.exit(1);
+                }
+            });
+        } catch (Throwable t) {
+            logStartupFailure(t);
+            System.exit(1);
+        }
+    }
+
+    private static void logStartupFailure(Throwable t) {
+        String message = "Fatal startup error: Minecraft Stats Viewer failed to initialize.";
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        String details = message + System.lineSeparator() + sw;
+
+        System.err.println(details);
+
+        try {
+            Path logPath = Path.of(System.getProperty("user.home"), ".mcstats-startup-error.log");
+            Files.writeString(
+                    logPath,
+                    details + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE
+            );
+        } catch (Exception ignored) {
+            // Best effort file logging only; stderr is the primary fallback.
+        }
     }
 }
 
