@@ -2,6 +2,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group 'com.example'
@@ -17,6 +18,13 @@ dependencies {
 
 application {
     mainClass = 'com.example.mcstats.Main'
+}
+
+shadowJar {
+    archiveClassifier = 'all'
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
 }
 
 java {
